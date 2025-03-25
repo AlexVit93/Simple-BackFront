@@ -1,0 +1,14 @@
+{
+  "name": "main/auth-system",
+  "description": "User management system with PHP and React",
+  "type": "project",
+  "require": {
+    "gabordemooij/redbean": "^5.7"
+  },
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  }
+}
