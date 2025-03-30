@@ -45,7 +45,6 @@
 ### 🔑 Key Features:
 
 - **Toolbar** above the action table:  
-  ![Panel](media/toolbar_example.png)
 - Buttons: `Block' (text), `Unblock' (icon), `Delete' (icon).
 - **Responsive design** (support for mobile devices via Bootstrap).
 - **Dynamic reloading** of data after actions.
