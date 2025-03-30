@@ -2,36 +2,39 @@
 require_once '../orm/rb.php';
 require_once 'auth_check.php';
 ORM::init();
-
 header('Content-Type: application/json');
-
 try {
-    switch ($_SERVER['REQUEST_METHOD']) {
-        case 'GET':
+    $methodHandlers = [
+        'GET' => function() {
             $users = R::findAll('users', 'ORDER BY last_login DESC');
             echo json_encode(R::exportAll($users));
-            break;
-
-        case 'POST':
+        },        
+        'POST' => function() {
             $data = json_decode(file_get_contents("php://input"), true);
-            
+            $actionHandlers = [
+                'block' => function($user) { $user->status = 'blocked'; },
+                'unblock' => function($user) { $user->status = 'active'; },
+                'delete' => function($user) { R::trash($user); }
+            ];
+            $usersToStore = [];
             foreach ($data['ids'] as $id) {
-                $user = R::load('users', $id);
-                if ($user->id !== 0) {
-                    switch ($data['action']) {
-                        case 'block': $user->status = 'blocked'; break;
-                        case 'unblock': $user->status = 'active'; break;
-                        case 'delete': R::trash($user); break;
+                if ($user = R::load('users', $id)) {
+                    if (isset($actionHandlers[$data['action']])) {
+                        $actionHandlers[$data['action']]($user);
+                        $usersToStore[] = $user;
                     }
                 }
-            }
-            R::storeAll($users);
+            }          
+            R::storeAll($usersToStore);
             echo json_encode(['message' => 'Action completed']);
-            break;
-
-        default:
-            http_response_code(405);
-            echo json_encode(['error' => 'Method not allowed']);
+        }
+    ];
+    $method = $_SERVER['REQUEST_METHOD'];
+    if (isset($methodHandlers[$method])) {
+        $methodHandlers[$method]();
+    } else {
+        http_response_code(405);
+        echo json_encode(['error' => 'Method not allowed']);
     }
 } catch (Exception $e) {
     http_response_code(500);

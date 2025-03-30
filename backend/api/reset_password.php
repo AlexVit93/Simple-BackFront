@@ -9,12 +9,12 @@ try {
     $data = json_decode(file_get_contents("php://input"), true);
     
     if (empty($data['email']) || empty($data['password'])) {
-        throw new Exception('Все поля обязательны для заполнения');
+        throw new Exception('All fields are required to fill in!');
     }
     
     $user = R::findOne('users', 'email = ?', [$data['email']]);
     if (!$user) {
-        throw new Exception('Пользователь с таким email не найден');
+        throw new Exception('The user with this email was not found');
     }
     
     $user->password_hash = password_hash($data['password'], PASSWORD_DEFAULT);
